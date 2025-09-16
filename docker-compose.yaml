@@ -16,6 +16,8 @@ services:
         condition: service_healthy
   db:
     image: postgres:13
+    ports:
+      - "5432:5432"
     environment:
       - POSTGRES_USER=user
       - POSTGRES_PASSWORD=password
