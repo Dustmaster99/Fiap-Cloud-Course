@@ -6,29 +6,10 @@ services:
     volumes:
       - .:/app
     environment:
-      - DB_HOST=db
+      # Use o endpoint público ou privado do seu banco no RDS
+      - DB_HOST=tooglemaster-app-db.c5m42qk2wlfc.us-east-1.rds.amazonaws.com
       - DB_NAME=togglemaster
-      - DB_USER=user
-      - DB_PASSWORD=password
+      - DB_USER=postgres
+      - DB_PASSWORD=rootroot
       - DB_PORT=5432
-    depends_on:
-      db:
-        condition: service_healthy
-  db:
-    image: postgres:13
-    ports:
-      - "5432:5432"
-    environment:
-      - POSTGRES_USER=user
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=togglemaster
-    volumes:
-      - postgres_data:/var/lib/postgresql/data/
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U user -d togglemaster"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
-volumes:
-  postgres_data:
