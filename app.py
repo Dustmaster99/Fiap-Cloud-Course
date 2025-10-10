@@ -3,13 +3,41 @@ import click
 from flask import Flask, request, jsonify
 import psycopg2
 from psycopg2.extras import RealDictCursor
+import boto3
+from botocore.exceptions import ClientError
+
+# -------------------------------
+# Função para obter segredo da AWS
+# -------------------------------
+def get_secret():
+    secret_name = "tooglemasterDB"
+    region_name = "us-east-1"
+
+    session = boto3.session.Session()
+    client = session.client(service_name='secretsmanager', region_name=region_name)
+
+    try:
+        get_secret_value_response = client.get_secret_value(SecretId=secret_name)
+    except ClientError as e:
+        print(f"Erro ao acessar o Secret Manager: {e}")
+        raise e
+
+    secret = get_secret_value_response['SecretString']
+    return json.loads(secret)
+
+# Carrega as credenciais do Secret Manager
+db_secret = get_secret()
+
+DB_HOST = db_secret["host"]
+DB_NAME = db_secret["dbname"]
+DB_USER = db_secret["username"]
+DB_PASSWORD = db_secret["password"]
+
+# -------------------------------
+# App Flask
+# -------------------------------
 
 app = Flask(__name__)
-
-DB_HOST = os.getenv("DB_HOST")
-DB_NAME = os.getenv("DB_NAME")
-DB_USER = os.getenv("DB_USER")
-DB_PASSWORD = os.getenv("DB_PASSWORD")
 
 def get_db_connection():
     conn = psycopg2.connect(
